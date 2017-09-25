@@ -50,7 +50,7 @@
         UICollectionViewLayoutAttributes *sectionHeaderAttributes = [self layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForRow:0 inSection:itemSection]];
         if (!CGSizeEqualToSize(sectionHeaderAttributes.size, CGSizeZero)) {
             [_layoutAttributes addObject:sectionHeaderAttributes];
-            [_layoutAttributesDic setObject:sectionHeaderAttributes forKey:[NSString stringWithFormat:@"section%ldheader", itemSection]];
+            [_layoutAttributesDic setObject:sectionHeaderAttributes forKey:[NSString stringWithFormat:@"section%ziheader", itemSection]];
         }
         
         // 计算item布局
@@ -70,7 +70,7 @@
         UICollectionViewLayoutAttributes *sectionFooterAttributes = [self layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForRow:0 inSection:itemSection]];
         if (!CGSizeEqualToSize(sectionFooterAttributes.size, CGSizeZero)) {
             [_layoutAttributes addObject:sectionFooterAttributes];
-            [_layoutAttributesDic setObject:sectionHeaderAttributes forKey:[NSString stringWithFormat:@"section%ldfooter", itemSection]];
+            [_layoutAttributesDic setObject:sectionHeaderAttributes forKey:[NSString stringWithFormat:@"section%zifooter", itemSection]];
         }
     }
 }
@@ -251,9 +251,9 @@
     UICollectionViewLayoutAttributes *attributes;
     
     if ([elementKind isEqualToString:UICollectionElementKindSectionHeader]) {
-        attributes = [_layoutAttributesDic objectForKey:[NSString stringWithFormat:@"section%ldheader", indexPath.section]];
+        attributes = [_layoutAttributesDic objectForKey:[NSString stringWithFormat:@"section%ziheader", indexPath.section]];
     }else if ([elementKind isEqualToString:UICollectionElementKindSectionFooter])  {
-        attributes = [_layoutAttributesDic objectForKey:[NSString stringWithFormat:@"section%ldfooter", indexPath.section]];
+        attributes = [_layoutAttributesDic objectForKey:[NSString stringWithFormat:@"section%zifooter", indexPath.section]];
     }
     
     if (attributes) {
