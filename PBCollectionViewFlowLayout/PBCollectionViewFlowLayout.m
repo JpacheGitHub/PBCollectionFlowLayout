@@ -13,6 +13,7 @@
  所有布局方式
  */
 @property (nonatomic, strong) NSMutableArray *layoutAttributes;
+@property (nonatomic, strong) NSMutableDictionary *layoutAttributesDic;
 /**
  所有可以放置cell的起点, 字典内容为CGRect
  */
@@ -27,6 +28,7 @@
     self = [super init];
     if (self) {
         _layoutAttributes = [NSMutableArray array];
+        _layoutAttributesDic = [NSMutableDictionary dictionary];
         _everyLayoutPositions = [NSMutableArray array];
         _collectionViewContentWidth = 0.f;
     }
@@ -38,6 +40,7 @@
     
     [_layoutAttributes removeAllObjects];
     [_everyLayoutPositions removeAllObjects];
+    [_layoutAttributesDic removeAllObjects];
     [_everyLayoutPositions addObject:[NSValue valueWithCGRect:CGRectMake(0, 0, self.collectionView.frame.size.width, MAXFLOAT)]];
     
     NSInteger sectionCount = self.collectionView.numberOfSections;
@@ -45,7 +48,10 @@
         
         // 计算header布局
         UICollectionViewLayoutAttributes *sectionHeaderAttributes = [self layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForRow:0 inSection:itemSection]];
-        [_layoutAttributes addObject:sectionHeaderAttributes];
+        if (!CGSizeEqualToSize(sectionHeaderAttributes.size, CGSizeZero)) {
+            [_layoutAttributes addObject:sectionHeaderAttributes];
+            [_layoutAttributesDic setObject:sectionHeaderAttributes forKey:[NSString stringWithFormat:@"section%ldheader", itemSection]];
+        }
         
         // 计算item布局
         NSInteger itemCount = [self.collectionView numberOfItemsInSection:itemSection];
@@ -54,18 +60,31 @@
             NSIndexPath *indexPath = [NSIndexPath indexPathForRow:itemRow inSection:itemSection];
             // 生成布局信息
             UICollectionViewLayoutAttributes *attributes = [self layoutAttributesForItemAtIndexPath:indexPath];
-            [_layoutAttributes addObject:attributes];
+            if (!CGSizeEqualToSize(attributes.size, CGSizeZero)) {
+                [_layoutAttributes addObject:attributes];
+                [_layoutAttributesDic setObject:attributes forKey:indexPath];
+            }
         }
         
         // 计算footer布局
         UICollectionViewLayoutAttributes *sectionFooterAttributes = [self layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForRow:0 inSection:itemSection]];
-        [_layoutAttributes addObject:sectionFooterAttributes];
+        if (!CGSizeEqualToSize(sectionFooterAttributes.size, CGSizeZero)) {
+            [_layoutAttributes addObject:sectionFooterAttributes];
+            [_layoutAttributesDic setObject:sectionHeaderAttributes forKey:[NSString stringWithFormat:@"section%ldfooter", itemSection]];
+        }
     }
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath {
     
-    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
+    UICollectionViewLayoutAttributes *attributes;
+    attributes = [_layoutAttributesDic objectForKey:indexPath];
+    if (attributes) {
+        return attributes;
+    }
+    
+    attributes = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
+    
     CGSize itemSize = CGSizeZero;
     CGFloat itemLineSpace = 0.f;
     CGFloat itemColumnSpace = 0.f;
@@ -228,7 +247,21 @@
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath {
-    UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:elementKind withIndexPath:indexPath];
+    
+    UICollectionViewLayoutAttributes *attributes;
+    
+    if ([elementKind isEqualToString:UICollectionElementKindSectionHeader]) {
+        attributes = [_layoutAttributesDic objectForKey:[NSString stringWithFormat:@"section%ldheader", indexPath.section]];
+    }else if ([elementKind isEqualToString:UICollectionElementKindSectionFooter])  {
+        attributes = [_layoutAttributesDic objectForKey:[NSString stringWithFormat:@"section%ldfooter", indexPath.section]];
+    }
+    
+    if (attributes) {
+        return attributes;
+    }
+    
+    attributes = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:elementKind withIndexPath:indexPath];
+    
     CGSize itemSize = CGSizeZero;
     UIEdgeInsets itemEdgeInsets = UIEdgeInsetsZero;
     CGRect tempRect = [self getMaxYRect];

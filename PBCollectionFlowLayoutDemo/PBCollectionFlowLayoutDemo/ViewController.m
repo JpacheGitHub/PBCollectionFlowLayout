@@ -70,8 +70,14 @@
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
     UICollectionReusableView *view = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"hehe" forIndexPath:indexPath];
     if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+        if (indexPath.section == 0) {
+            return nil;
+        }
         view.backgroundColor = [UIColor yellowColor];
     }else {
+        if (indexPath.section == 0 || indexPath.section == 2 || indexPath.section == 4) {
+            return nil;
+        }
         view.backgroundColor = [UIColor cyanColor];
     }
     return view;
